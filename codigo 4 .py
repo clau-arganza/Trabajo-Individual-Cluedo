@@ -1,10 +1,9 @@
 from collections import deque, defaultdict
 import math
 import matplotlib.pyplot as plt
+import time  # para la cuenta atrás
 
-# ============================================================
 # 1. Grafo del caso
-# ============================================================
 
 def crear_grafo_universidad():
     """
@@ -30,9 +29,7 @@ def crear_grafo_universidad():
     return grafo
 
 
-# ============================================================
 # POSICIONES DEL GRAFO
-# ============================================================
 
 POSICIONES = {
     "Z10": (0, 10),
@@ -44,9 +41,7 @@ POSICIONES = {
 }
 
 
-# ============================================================
 # 2. Grafo base
-# ============================================================
 
 def dibujar_grafo_base(grafo):
     plt.figure(figsize=(5, 10))
@@ -79,9 +74,7 @@ def dibujar_grafo_base(grafo):
     plt.show()
 
 
-# ============================================================
 # 3. Grafo con pistas
-# ============================================================
 
 def dibujar_grafo_con_pistas(grafo, pistas_por_lugar):
     plt.figure(figsize=(6, 10))
@@ -122,9 +115,7 @@ def dibujar_grafo_con_pistas(grafo, pistas_por_lugar):
     plt.show()
 
 
-# ============================================================
 # 4. Grafo con sospechoso principal por nodo
-# ============================================================
 
 def dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar):
     plt.figure(figsize=(6, 10))
@@ -168,9 +159,7 @@ def dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar):
     plt.show()
 
 
-# ============================================================
-# 5. Pistas del caso (REPARTO NUEVO)
-# ============================================================
+# 5. Pistas del caso
 
 def crear_pistas():
     pistas = [
@@ -215,9 +204,7 @@ def agrupar_pistas_por_lugar(pistas):
     return por_lugar
 
 
-# ============================================================
 # 6. BFS
-# ============================================================
 
 def bfs_explorar(grafo, nodo_inicial, pistas_por_lugar):
     visitados = set([nodo_inicial])
@@ -240,9 +227,7 @@ def bfs_explorar(grafo, nodo_inicial, pistas_por_lugar):
     return orden, pistas_encontradas
 
 
-# ============================================================
 # 7. Dijkstra
-# ============================================================
 
 def dijkstra(grafo, origen):
     dist = {n: math.inf for n in grafo}
@@ -274,9 +259,7 @@ def reconstruir_camino(previo, origen, destino):
     return camino[::-1]
 
 
-# ============================================================
 # 8. Puntuación de sospechosos
-# ============================================================
 
 def calcular_puntuaciones_sospechosos(pistas_encontradas):
     punt = defaultdict(int)
@@ -290,9 +273,7 @@ def ranking_sospechosos(puntuaciones):
     return sorted(puntuaciones.items(), key=lambda x: x[1], reverse=True)
 
 
-# ============================================================
 # 9. PROGRAMA PRINCIPAL (MENÚ)
-# ============================================================
 
 if __name__ == "__main__":
     grafo = crear_grafo_universidad()
@@ -300,8 +281,9 @@ if __name__ == "__main__":
     pistas_por_lugar = agrupar_pistas_por_lugar(pistas)
     origen = "C0"
 
-    # DEBUG para que veas cómo quedan realmente las pistas
-    print("DEBUG pistas_por_lugar:",
+    print("=== CLUEDO FINAL ===")  # para comprobar que es este archivo
+
+    print("Pistas por lugar:",
           {k: [p['id'] for p in v] for k, v in pistas_por_lugar.items()})
 
     while True:
@@ -310,9 +292,9 @@ if __name__ == "__main__":
         print("1) Grafo base + BFS + Dijkstra + ranking sospechosos")
         print("2) Grafo con pistas en cada nodo")
         print("3) Grafo con sospechoso principal por nodo")
-        print("4) Salir")
+        print("4) ¿Quieres saber quién fue el asesino?")
         print("============================")
-        modo = input("Elige 1, 2, 3 o 4: ")
+        modo = input("Elige 1, 2, 3 o 4: ").strip()
 
         if modo == "1":
             dibujar_grafo_base(grafo)
@@ -347,7 +329,23 @@ if __name__ == "__main__":
             dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar)
 
         elif modo == "4":
-            print("Saliendo del programa. ¡Hasta pronto!")
+            print("\nHas elegido la opción 4.")
+            respuesta = input("¿Quieres saber quiénes fueron los asesinos? (si/no): ").strip().lower()
+
+            # Cuenta atrás 3, 2, 1
+            for n in [3, 2, 1]:
+                print(n)
+                time.sleep(1)
+
+            if respuesta.startswith("s"):
+                print("\nLos verdaderos asesinos fueron... PEPELU Y EVA!!!")
+                print("Eva no soportaba más las cuentas atrás de reloj de Fausto y")
+                print("Pepelu se compinchó con ella porque le mataban los celos")
+                print("de que los alumnos lo prefiriesen a él.")
+            else:
+                print("\nTú mismo, te quedas sin saberlo")
+
+            print("\nFin del programa. ¡Hasta pronto!")
             break
 
         else:
