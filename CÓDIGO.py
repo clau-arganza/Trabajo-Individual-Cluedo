@@ -3,11 +3,21 @@ import math
 import matplotlib.pyplot as plt
 import time  # para la cuenta atrás
 
-# ============================================================
 # 1. Grafo del caso
-# ============================================================
 
 def crear_grafo_universidad():
+    """
+    Grafo no dirigido de la universidad.
+    Los pesos representan minutos en ascensor entre ubicaciones.
+
+    Nodos y pistas:
+      - Z10: Zona de descanso (planta 10) – P3 (Beltrán)
+      - F7:  Despacho de Fausto (planta 7) – P2 (Eva)
+      - B6:  Biblioteca (planta 6) – P5 (Rodrigo)
+      - A3:  Aulas grandes (planta 3) – P4 (Adriana)
+      - C0:  Cafetería (planta 0) – sin pistas
+      - S-1: Sótano / taller 3D – P1 (Pepelu)
+    """
     grafo = {
         "Z10": [("F7", 5), ("B6", 6), ("A3", 9), ("C0", 12), ("S-1", 13)],
         "F7":  [("Z10", 5), ("B6", 3), ("A3", 6), ("C0", 9), ("S-1", 10)],
@@ -19,6 +29,8 @@ def crear_grafo_universidad():
     return grafo
 
 
+# POSICIONES DEL GRAFO
+
 POSICIONES = {
     "Z10": (0, 10),
     "F7":  (-1, 8),
@@ -29,9 +41,7 @@ POSICIONES = {
 }
 
 
-# ============================================================
-# 2. Dibujar grafo base
-# ============================================================
+# 2. Grafo base
 
 def dibujar_grafo_base(grafo):
     plt.figure(figsize=(5, 10))
@@ -51,7 +61,12 @@ def dibujar_grafo_base(grafo):
             x2, y2 = POSICIONES[destino]
             plt.plot([x1, x2], [y1, y2])
             xm, ym = (x1 + x2) / 2, (y1 + y2) / 2
-            plt.text(xm, ym, str(peso), fontsize=9, ha="center")
+            plt.text(
+                xm, ym, str(peso),
+                fontsize=9, ha="center", va="center",
+                bbox=dict(boxstyle="round,pad=0.2",
+                          fc="white", ec="none")
+            )
 
     plt.title("Grafo del edificio (minutos en ascensor)")
     plt.axis("off")
@@ -59,16 +74,14 @@ def dibujar_grafo_base(grafo):
     plt.show()
 
 
-# ============================================================
 # 3. Grafo con pistas
-# ============================================================
 
 def dibujar_grafo_con_pistas(grafo, pistas_por_lugar):
     plt.figure(figsize=(6, 10))
 
     for nodo, (x, y) in POSICIONES.items():
         plt.scatter(x, y, s=2000)
-        plt.text(x, y + 0.3, nodo, ha="center",
+        plt.text(x, y + 0.3, nodo, ha="center", va="center",
                  color="white", fontsize=12, fontweight="bold")
 
         if nodo in pistas_por_lugar:
@@ -77,20 +90,24 @@ def dibujar_grafo_con_pistas(grafo, pistas_por_lugar):
         else:
             texto = "Sin pistas"
 
-        plt.text(x, y - 0.8, texto, ha="center", fontsize=9)
+        plt.text(x, y - 0.8, texto, ha="center", va="center", fontsize=9)
 
-    # aristas
-    dib = set()
-    for o, vecinos in grafo.items():
-        x1, y1 = POSICIONES[o]
-        for d, peso in vecinos:
-            if (d, o) in dib:
+    dibujadas = set()
+    for origen, vecinos in grafo.items():
+        x1, y1 = POSICIONES[origen]
+        for destino, peso in vecinos:
+            if (destino, origen) in dibujadas:
                 continue
-            dib.add((o, d))
-            x2, y2 = POSICIONES[d]
+            dibujadas.add((origen, destino))
+            x2, y2 = POSICIONES[destino]
             plt.plot([x1, x2], [y1, y2])
-            xm, ym = (x1 + x2)/2, (y1 + y2)/2
-            plt.text(xm, ym, str(peso), fontsize=8, ha="center")
+            xm, ym = (x1 + x2) / 2, (y1 + y2) / 2
+            plt.text(
+                xm, ym, str(peso),
+                fontsize=8, ha="center", va="center",
+                bbox=dict(boxstyle="round,pad=0.2",
+                          fc="white", ec="none")
+            )
 
     plt.title("Grafo con pistas por nodo")
     plt.axis("off")
@@ -98,41 +115,42 @@ def dibujar_grafo_con_pistas(grafo, pistas_por_lugar):
     plt.show()
 
 
-# ============================================================
 # 4. Grafo con sospechoso principal por nodo
-# ============================================================
 
 def dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar):
     plt.figure(figsize=(6, 10))
 
     for nodo, (x, y) in POSICIONES.items():
         plt.scatter(x, y, s=2500)
-        plt.text(x, y + 0.6, nodo, ha="center",
+        plt.text(x, y + 0.6, nodo, ha="center", va="center",
                  color="white", fontsize=12, fontweight="bold")
 
         texto = "Sin sospechosos"
         if nodo in pistas_por_lugar:
-            puntos = defaultdict(int)
+            puntos_locales = defaultdict(int)
             for pista in pistas_por_lugar[nodo]:
-                for s, peso in pista["sospechosos"].items():
-                    puntos[s] += peso
-            if puntos:
-                top, pts = max(puntos.items(), key=lambda x: x[1])
-                texto = f"{top} ({pts} pts)"
+                for sospechoso, peso in pista["sospechosos"].items():
+                    puntos_locales[sospechoso] += peso
 
-        plt.text(x, y - 0.4, texto, ha="center",
+            if puntos_locales:
+                sospechoso_top, puntos_top = max(
+                    puntos_locales.items(), key=lambda x: x[1]
+                )
+                texto = f"{sospechoso_top} ({puntos_top} pts)"
+
+        plt.text(x, y - 0.4, texto, ha="center", va="center",
                  fontsize=10, fontweight="bold",
                  bbox=dict(boxstyle="round,pad=0.3",
                            fc="white", ec="black"))
 
-    dib = set()
-    for o, vecinos in grafo.items():
-        x1, y1 = POSICIONES[o]
-        for d, _ in vecinos:
-            if (d, o) in dib:
+    dibujadas = set()
+    for origen, vecinos in grafo.items():
+        x1, y1 = POSICIONES[origen]
+        for destino, _ in vecinos:
+            if (destino, origen) in dibujadas:
                 continue
-            dib.add((o, d))
-            x2, y2 = POSICIONES[d]
+            dibujadas.add((origen, destino))
+            x2, y2 = POSICIONES[destino]
             plt.plot([x1, x2], [y1, y2], linestyle="--", color="gray")
 
     plt.title("Sospechoso principal por nodo")
@@ -141,43 +159,56 @@ def dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar):
     plt.show()
 
 
-# ============================================================
-# 5. Pistas
-# ============================================================
+# 5. Pistas del caso
 
 def crear_pistas():
-    return [
-        {"id": "P1", "lugar": "S-1",
-         "descripcion": "Script 3D de Pepelu",
-         "sospechosos": {"Pepelu": 4}},
-        {"id": "P2", "lugar": "F7",
-         "descripcion": "Tarjeta de Eva a las 19:52",
-         "sospechosos": {"Eva": 4}},
-        {"id": "P3", "lugar": "Z10",
-         "descripcion": "Post-it de Beltrán",
-         "sospechosos": {"Beltrán": 1}},
-        {"id": "P4", "lugar": "A3",
-         "descripcion": "Etiquetas Zara de Adriana",
-         "sospechosos": {"Adriana": 2}},
-        {"id": "P5", "lugar": "B6",
-         "descripcion": "Cera y prismáticos de Rodrigo",
-         "sospechosos": {"Rodrigo": 3}},
+    pistas = [
+        {
+            "id": "P1",
+            "lugar": "S-1",  # Pepelu -> sótano
+            "descripcion": "Fragmento de script 'fix_impresora_pepelu.py' que activa el motor de la impresora 3D",
+            "sospechosos": {"Pepelu": 4}
+        },
+        {
+            "id": "P2",
+            "lugar": "F7",  # Eva -> despacho Fausto
+            "descripcion": "Registro de tarjeta de Eva a las 19:52h en la planta 7",
+            "sospechosos": {"Eva": 4}
+        },
+        {
+            "id": "P3",
+            "lugar": "Z10",  # Beltrán -> post-it
+            "descripcion": "Post-it: 'A las 20:00 todos al sótano. Traed sillas que hay Champions. —B.",
+            "sospechosos": {"Beltrán": 1}
+        },
+        {
+            "id": "P4",
+            "lugar": "A3",  # Adriana -> aulas grandes
+            "descripcion": "Etiquetas del Black Friday de Zara en la papelera de la clase que había dado Fausto la hora anterior a su muerte",
+            "sospechosos": {"Adriana": 2}
+        },
+        {
+            "id": "P5",
+            "lugar": "B6",  # Rodrigo -> biblioteca
+            "descripcion": "Restos de cera y prismáticos al lado del casco de moto de Fausto",
+            "sospechosos": {"Rodrigo": 3}
+        },
     ]
+    return pistas
+
 
 def agrupar_pistas_por_lugar(pistas):
-    d = defaultdict(list)
+    por_lugar = defaultdict(list)
     for p in pistas:
-        d[p["lugar"]].append(p)
-    return d
+        por_lugar[p["lugar"]].append(p)
+    return por_lugar
 
 
-# ============================================================
 # 6. BFS
-# ============================================================
 
-def bfs_explorar(grafo, inicio, pistas_por_lugar):
-    visitados = {inicio}
-    cola = deque([inicio])
+def bfs_explorar(grafo, nodo_inicial, pistas_por_lugar):
+    visitados = set([nodo_inicial])
+    cola = deque([nodo_inicial])
     orden = []
     pistas_encontradas = []
 
@@ -196,43 +227,38 @@ def bfs_explorar(grafo, inicio, pistas_por_lugar):
     return orden, pistas_encontradas
 
 
-# ============================================================
-# 7. Dijkstra + camino
-# ============================================================
+# 7. Dijkstra
 
 def dijkstra(grafo, origen):
     dist = {n: math.inf for n in grafo}
-    prev = {n: None for n in grafo}
+    previo = {n: None for n in grafo}
     dist[origen] = 0
-    no_visit = set(grafo.keys())
+    no_visitados = set(grafo.keys())
 
-    while no_visit:
-        actual = min(no_visit, key=lambda n: dist[n])
-        no_visit.remove(actual)
+    while no_visitados:
+        actual = min(no_visitados, key=lambda n: dist[n])
+        no_visitados.remove(actual)
 
         for vecino, peso in grafo[actual]:
             nueva = dist[actual] + peso
             if nueva < dist[vecino]:
                 dist[vecino] = nueva
-                prev[vecino] = actual
+                previo[vecino] = actual
 
-    return dist, prev
+    return dist, previo
 
 
-def reconstruir_camino(prev, origen, destino):
+def reconstruir_camino(previo, origen, destino):
     camino = []
     actual = destino
     while actual is not None:
         camino.append(actual)
         if actual == origen:
             break
-        actual = prev[actual]
+        actual = previo[actual]
     return camino[::-1]
 
-
-# ============================================================
-# 7 BIS. Distancias entre todas las parejas + plan óptimo
-# ============================================================
+# 8.bis Distancias entre todos los nodos + plan óptimo
 
 def precomputar_distancias_todas(grafo):
     distancias = {}
@@ -250,10 +276,7 @@ def valor_lugar(lugar, pistas_por_lugar):
 
 
 def mejor_ruta_investigacion(origen, t_max, pistas_por_lugar, distancias):
-    valor_por_lugar = {
-        lugar: valor_lugar(lugar, pistas_por_lugar)
-        for lugar in distancias
-    }
+    valor_por_lugar = {l: valor_lugar(l, pistas_por_lugar) for l in distancias}
 
     mejor_val = -1
     mejor_cam = [origen]
@@ -269,14 +292,13 @@ def mejor_ruta_investigacion(origen, t_max, pistas_por_lugar, distancias):
             if sig == actual:
                 continue
             coste = distancias[actual][sig]
-            t2 = tiempo + coste
-            if t2 > t_max:
+            if tiempo + coste > t_max:
                 continue
 
             ganancia = valor_por_lugar[sig] if sig not in visitados else 0
 
             camino.append(sig)
-            backtracking(sig, t2, valor + ganancia,
+            backtracking(sig, tiempo + coste, valor + ganancia,
                          visitados | {sig}, camino)
             camino.pop()
 
@@ -287,16 +309,13 @@ def mejor_ruta_investigacion(origen, t_max, pistas_por_lugar, distancias):
 
     return mejor_val, mejor_cam
 
-
-# ============================================================
-# 8. Ranking sospechosos
-# ============================================================
+# 9. Puntuación de sospechosos
 
 def calcular_puntuaciones_sospechosos(pistas_encontradas):
     punt = defaultdict(int)
-    for p in pistas_encontradas:
-        for s, peso in p["sospechosos"].items():
-            punt[s] += peso
+    for pista in pistas_encontradas:
+        for sospechoso, peso in pista["sospechosos"].items():
+            punt[sospechoso] += peso
     return dict(punt)
 
 
@@ -304,9 +323,7 @@ def ranking_sospechosos(puntuaciones):
     return sorted(puntuaciones.items(), key=lambda x: x[1], reverse=True)
 
 
-# ============================================================
-# 9. MENÚ PRINCIPAL
-# ============================================================
+# 10. PROGRAMA PRINCIPAL (MENÚ)
 
 if __name__ == "__main__":
     grafo = crear_grafo_universidad()
@@ -315,11 +332,13 @@ if __name__ == "__main__":
     origen = "C0"
     distancias_todas = precomputar_distancias_todas(grafo)
 
-    print("=== CLUEDO FINAL ===")
+    print("=== CLUEDO FINAL ===")  # para comprobar que es este archivo
+
+    print("Pistas por lugar:",
+          {k: [p['id'] for p in v] for k, v in pistas_por_lugar.items()})
 
     while True:
         print("\n============================")
-        print("¿Qué quieres ver ahora?")
         print("1) Grafo base + BFS + Dijkstra + ranking sospechosos")
         print("2) Grafo con pistas en cada nodo")
         print("3) Plan óptimo de investigación (tiempo limitado)")
@@ -328,7 +347,7 @@ if __name__ == "__main__":
         print("============================")
         modo = input("Elige 1, 2, 3, 4 o 5: ").strip()
 
-        # ---- 1 ----
+
         if modo == "1":
             dibujar_grafo_base(grafo)
 
@@ -339,12 +358,12 @@ if __name__ == "__main__":
             for p in pistas_encontradas:
                 print(f"- {p['id']} ({p['descripcion']}) en {p['lugar']}")
 
-            dist, prev = dijkstra(grafo, origen)
+            dist, previo = dijkstra(grafo, origen)
             print("\nTiempos mínimos desde", origen)
-            for n in grafo:
-                print(f"- {n}: {dist[n]} min")
+            for nodo in grafo:
+                print(f"- {nodo}: {dist[nodo]} min")
 
-            camino = reconstruir_camino(prev, origen, "S-1")
+            camino = reconstruir_camino(previo, origen, "S-1")
             print("\nCamino mínimo C0 → S-1:", " -> ".join(camino),
                   f"({dist['S-1']} min)")
 
@@ -355,11 +374,9 @@ if __name__ == "__main__":
             for s, pts in ranking:
                 print(f"- {s}: {pts} puntos")
 
-        # ---- 2 ----
         elif modo == "2":
             dibujar_grafo_con_pistas(grafo, pistas_por_lugar)
 
-        # ---- 3 (nuevo algoritmo de optimización) ----
         elif modo == "3":
             print("\n=== PLAN ÓPTIMO DE INVESTIGACIÓN ===")
             try:
@@ -367,38 +384,36 @@ if __name__ == "__main__":
             except ValueError:
                 print("Tiempo no válido.")
                 continue
-
             mejor_valor, mejor_camino = mejor_ruta_investigacion(
                 origen, t_max, pistas_por_lugar, distancias_todas
             )
-
             print(f"\nRuta óptima en ≤ {t_max} minutos:")
             print(" -> ".join(mejor_camino))
-            print(f"Valor total de información recogida: {mejor_valor} puntos")
+            print(f"Valor total recogido: {mejor_valor} puntos")
 
-        # ---- 4 ----
-        elif modo == "4":
+
+        elif modo == "3":
             dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar)
 
-        # ---- 5 ----
-        elif modo == "5":
-            print("\nHas elegido la opción 5.")
-            r = input("¿Quieres saber quiénes fueron los asesinos? (si/no): ").strip().lower()
+        elif modo == "4":
+            print("\nHas elegido la opción 4.")
+            respuesta = input("¿Quieres saber quiénes fueron los asesinos? (si/no): ").strip().lower()
 
+            # Cuenta atrás 3, 2, 1
             for n in [3, 2, 1]:
                 print(n)
                 time.sleep(1)
 
-            if r.startswith("s"):
+            if respuesta.startswith("s"):
                 print("\nLos verdaderos asesinos fueron... PEPELU Y EVA!!!")
-                print("Eva no soportaba más las cuentas atrás de Fausto y")
-                print("Pepelu se compinchó por celos.")
+                print("Eva no soportaba más las cuentas atrás de reloj de Fausto y")
+                print("Pepelu se compinchó con ella porque le mataban los celos")
+                print("de que los alumnos lo prefiriesen a él.")
             else:
-                print("\nTú mismo, te quedas sin saberlo.")
+                print("\nTú mismo, te quedas sin saberlo")
 
             print("\nFin del programa. ¡Hasta pronto!")
             break
 
         else:
             print("Opción no válida.")
-
