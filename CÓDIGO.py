@@ -336,9 +336,10 @@ if __name__ == "__main__":
 
     print("Pistas por lugar:",
           {k: [p['id'] for p in v] for k, v in pistas_por_lugar.items()})
-
+    
     while True:
         print("\n============================")
+        print("¿Qué quieres ver ahora?")
         print("1) Grafo base + BFS + Dijkstra + ranking sospechosos")
         print("2) Grafo con pistas en cada nodo")
         print("3) Plan óptimo de investigación (tiempo limitado)")
@@ -346,7 +347,6 @@ if __name__ == "__main__":
         print("5) ¿Quieres saber quién fue el asesino?")
         print("============================")
         modo = input("Elige 1, 2, 3, 4 o 5: ").strip()
-
 
         if modo == "1":
             dibujar_grafo_base(grafo)
@@ -358,12 +358,12 @@ if __name__ == "__main__":
             for p in pistas_encontradas:
                 print(f"- {p['id']} ({p['descripcion']}) en {p['lugar']}")
 
-            dist, previo = dijkstra(grafo, origen)
+            dist, prev = dijkstra(grafo, origen)
             print("\nTiempos mínimos desde", origen)
-            for nodo in grafo:
-                print(f"- {nodo}: {dist[nodo]} min")
+            for n in grafo:
+                print(f"- {n}: {dist[n]} min")
 
-            camino = reconstruir_camino(previo, origen, "S-1")
+            camino = reconstruir_camino(prev, origen, "S-1")
             print("\nCamino mínimo C0 → S-1:", " -> ".join(camino),
                   f"({dist['S-1']} min)")
 
@@ -384,33 +384,34 @@ if __name__ == "__main__":
             except ValueError:
                 print("Tiempo no válido.")
                 continue
+
             mejor_valor, mejor_camino = mejor_ruta_investigacion(
                 origen, t_max, pistas_por_lugar, distancias_todas
             )
+
             print(f"\nRuta óptima en ≤ {t_max} minutos:")
             print(" -> ".join(mejor_camino))
-            print(f"Valor total recogido: {mejor_valor} puntos")
-
-
-        elif modo == "3":
-            dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar)
+            print(f"Valor total de información recogida: {mejor_valor} puntos")
 
         elif modo == "4":
-            print("\nHas elegido la opción 4.")
-            respuesta = input("¿Quieres saber quiénes fueron los asesinos? (si/no): ").strip().lower()
+            # AQUÍ va el grafo de sospechosos, no el asesino final
+            dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar)
 
-            # Cuenta atrás 3, 2, 1
+        elif modo == "5":
+            # AQUÍ va la revelación del asesino
+            print("\nHas elegido la opción 5.")
+            r = input("¿Quieres saber quiénes fueron los asesinos? (si/no): ").strip().lower()
+
             for n in [3, 2, 1]:
                 print(n)
                 time.sleep(1)
 
-            if respuesta.startswith("s"):
+            if r.startswith("s"):
                 print("\nLos verdaderos asesinos fueron... PEPELU Y EVA!!!")
-                print("Eva no soportaba más las cuentas atrás de reloj de Fausto y")
-                print("Pepelu se compinchó con ella porque le mataban los celos")
-                print("de que los alumnos lo prefiriesen a él.")
+                print("Eva no soportaba más las cuentas atrás de Fausto y")
+                print("Pepelu se compinchó por celos.")
             else:
-                print("\nTú mismo, te quedas sin saberlo")
+                print("\nTú mismo, te quedas sin saberlo.")
 
             print("\nFin del programa. ¡Hasta pronto!")
             break
