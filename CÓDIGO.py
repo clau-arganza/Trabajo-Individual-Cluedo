@@ -2,22 +2,10 @@ from collections import deque, defaultdict
 import math
 import matplotlib.pyplot as plt
 import time  # para la cuenta atrás
-#BFS para explorar el grafo,
-#Dijkstra para calcular tiempos mínimos,
-#y un backtracking con poda para buscar el plan óptimo de investigación con tiempo limitado.”
 
 # 1. DEFINICIÓN DEL GRAFO DEL CASO
 
-# Modelamos el edificio de la universidad como un grafo no dirigido.
-# Cada nodo es una localización (planta) y cada arista representa un desplazamiento en ascensor entre plantas.
-# El peso de cada arista son los minutos que tarda el trayecto.
-# Tamaño del problema:
-#   n = número de nodos (plantas)
-#   m = número de aristas (conexiones)
-# En este caso concreto n = 6 y m = 
-
-def crear_grafo_universidad():     #Aquí defino el grafo del caso,  nodo-planta edificio,
-                                   #aristas con peso(luego me permite calcular caminos mínimos y tiempos de investigación)
+def crear_grafo_universidad():   
     """
     Grafo no dirigido de la universidad.
     Los pesos representan minutos en ascensor entre ubicaciones.
@@ -43,7 +31,6 @@ def crear_grafo_universidad():     #Aquí defino el grafo del caso,  nodo-planta
 
 # POSICIONES DEL GRAFO EN EL DIBUJO
 
-# Solo se usan para representar el grafo gráficamente, no afectan a la complejidad de los algoritmos de búsqueda.
 
 POSICIONES = {
     "Z10": (0, 10),
@@ -234,9 +221,6 @@ def agrupar_pistas_por_lugar(pistas):      #agrupo pistas por lugar en un diccio
 
 # 6. BFS: EXPLORACIÓN EN ANCHURA DEL GRAFO
 
-# La función bfs_explorar recorre el grafo desde un nodo inicial (C0) usando Búsqueda en Anchura (BFS).
-#mete ese nodo en una cola, y va sacando nodos y metiendo sus vecinos, hasta recorrer todo el grafo.
-#Según va visitando las plantas, va añadiendo al listado todas las pistas que encuentra en cada nodo.
 # Complejidad temporal:
 #   O(n + m)  -> recorre cada nodo y cada arista como mucho una vez.
 
@@ -263,7 +247,6 @@ def bfs_explorar(grafo, nodo_inicial, pistas_por_lugar):
 
 # 7. DIJKSTRA: CAMINOS MÍNIMOS DESDE UN ORIGEN
 
-# Aquí Dijkstra busca el tiempo mínimo desde la cafetería hasta el resto de nodos,usando los pesos como minutos
 # Complejidad temporal O(n^2) (en cada paso busco el nodo no visitado con menor distancia haciendo un mínimo sobre el conjunto)
 
 def dijkstra(grafo, origen):
@@ -303,15 +286,6 @@ def reconstruir_camino(previo, origen, destino):
 
 # 8. PRECÁLCULO DE DISTANCIAS Y PLAN ÓPTIMO
 
-# La función precomputar_distancias_todas:
-#   - ejecuta Dijkstra una vez por cada nodo
-#   - tiene um coste total de: n * O(n^2) = O(n^3)
-# En nuestro grafo n=6, así que en la práctica es muy rápido, casi como O(1).
-# La función mejor_ruta_investigacion:
-#   - usa backtracking con poda para explorar rutas posibles.
-#   - en el peor caso la complejidad es exponencial (crece más rápido que cualquier O(n^k)).
-#   - en la práctica, el tamaño del grafo es tan pequeño y la restricción de tiempo tan fuerte que el algoritmo es
-#     totalmente manejable.
 
 def precomputar_distancias_todas(grafo):
     """
@@ -389,7 +363,6 @@ def mejor_ruta_investigacion(origen, t_max, pistas_por_lugar, distancias):
 
 # 9. PUNTUACIÓN GLOBAL DE SOSPECHOSOS
 
-# Aquí simplemente recorro la lista de pistas y sumo puntos por sospechoso. 
 # Complejidad O(P), siendo P el número de pistas encontradas.
 
 def calcular_puntuaciones_sospechosos(pistas_encontradas):
@@ -409,14 +382,6 @@ def ranking_sospechosos(puntuaciones):
 
 
 # 10. PROGRAMA PRINCIPAL (MENÚ)
-
-# Resumen de algoritmos por modo:
-#   Modo 1: BFS (O(n + m)) + Dijkstra (O(n^2)) + ranking (O(S log S))
-#   Modo 2: Solo dibujo del grafo con pistas (O(n + m + P))
-#   Modo 3: Precomputo O(n^3) + backtracking (exponencial en teoría,
-#           pero rápido en este tamaño de problema)
-#   Modo 4: Cálculo de sospechoso principal por nodo (O(n + P))
-#   Modo 5: Lógica narrativa, coste constante O(1).
 
 if __name__ == "__main__":
     grafo = crear_grafo_universidad()
@@ -439,8 +404,7 @@ if __name__ == "__main__":
         print("5) ¿Quieres saber quién fue el asesino?")
         modo = input("Elige 1, 2, 3, 4 o 5: ").strip()
 
-        if modo == "1":          #después de BFS,uso Dijkstra,imprimo los tiempos mínimos desde C0 a cada nodo y muestro el camino mínimo C0 → S-1.
-                                #Por último, sumo los puntos de las pistas encontradas y genero un ranking global de sospechosos ordenado con O(S log S)
+        if modo == "1":          
             dibujar_grafo_base(grafo)
 
             orden, pistas_encontradas = bfs_explorar(grafo, origen, pistas_por_lugar)
@@ -508,7 +472,3 @@ if __name__ == "__main__":
 
         else:
             print("Opción no válida.")      
-
-#En resumen, el proyecto combina una temática de Cluedo con estructuras de datos y algoritmos:
-#el grafo como modelo central, BFS para explorar, Dijkstra para tiempos mínimos y backtracking con poda para optimizar 
-# la ruta bajo restricciones de tiempo. De esta forma aplico varios conceptos de la asignatura en un contexto interactivo
