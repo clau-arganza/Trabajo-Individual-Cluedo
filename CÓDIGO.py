@@ -3,20 +3,15 @@ import math
 import matplotlib.pyplot as plt
 import time  # para la cuenta atrás
 
-# ============================================================
 # 1. DEFINICIÓN DEL GRAFO DEL CASO
-# ------------------------------------------------------------
+
 # Modelamos el edificio de la universidad como un grafo no dirigido.
-# Cada nodo es una localización (planta) y cada arista representa
-# un desplazamiento en ascensor entre dos plantas.
+# Cada nodo es una localización (planta) y cada arista representa un desplazamiento en ascensor entre plantas.
 # El peso de cada arista son los minutos que tarda el trayecto.
-#
 # Tamaño del problema:
 #   n = número de nodos (plantas)
 #   m = número de aristas (conexiones)
-# En este caso concreto n = 6 y m es muy pequeño, pero
-# en el análisis de eficiencia lo considero en general.
-# ============================================================
+# En este caso concreto n = 6 y m = 
 
 def crear_grafo_universidad():
     """
@@ -43,10 +38,8 @@ def crear_grafo_universidad():
 
 
 # POSICIONES DEL GRAFO EN EL DIBUJO
-# ------------------------------------------------------------
-# Solo se usan para representar el grafo gráficamente, no afectan
-# a la complejidad de los algoritmos de búsqueda.
-# ============================================================
+
+# Solo se usan para representar el grafo gráficamente, no afectan a la complejidad de los algoritmos de búsqueda.
 
 POSICIONES = {
     "Z10": (0, 10),
@@ -57,14 +50,9 @@ POSICIONES = {
     "S-1": (0, 0),
 }
 
-
-# ============================================================
 # 2. DIBUJO DEL GRAFO BASE
-# ------------------------------------------------------------
-# Complejidad aproximada: O(n + m)
-#   (se recorren todos los nodos y todas las aristas una vez
-#    para dibujar).
-# ============================================================
+
+# Complejidad aproximada: O(n + m) (se recorren todos los nodos y todas las aristas una vez para dibujarlo).
 
 def dibujar_grafo_base(grafo):
     plt.figure(figsize=(5, 10))
@@ -97,12 +85,10 @@ def dibujar_grafo_base(grafo):
     plt.show()
 
 
-# ============================================================
 # 3. GRAFO CON PISTAS
-# ------------------------------------------------------------
-# También recorre todos los nodos y aristas una vez:
+
+# También recorre todos los nodos y aristas una vez
 # Complejidad: O(n + m)
-# ============================================================
 
 def dibujar_grafo_con_pistas(grafo, pistas_por_lugar):
     plt.figure(figsize=(6, 10))
@@ -143,14 +129,10 @@ def dibujar_grafo_con_pistas(grafo, pistas_por_lugar):
     plt.show()
 
 
-# ============================================================
 # 4. GRAFO CON SOSPECHOSO PRINCIPAL POR NODO
-# ------------------------------------------------------------
-# Para cada nodo se recorren sus pistas locales (si las hay),
-# lo que en total es proporcional al número de pistas P.
-# Complejidad: O(n + m + P)
-# (en este problema P es muy pequeño).
-# ============================================================
+
+# Para cada nodo se recorren sus pistas (si las hay),lo que en total es proporcional al número de pistas P.
+# Complejidad: O(n + m + P) (en este problema P es muy pequeño = 4)
 
 def dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar):
     plt.figure(figsize=(6, 10))
@@ -194,12 +176,9 @@ def dibujar_grafo_con_sospechosos(grafo, pistas_por_lugar):
     plt.show()
 
 
-# ============================================================
 # 5. PISTAS DEL CASO
-# ------------------------------------------------------------
-# Crear la lista de pistas es O(P), siendo P el número de pistas.
-# En este ejemplo es constante y muy pequeño.
-# ============================================================
+
+# Crear la lista de pistas es O(P), siendo P el número de pistas (constante y muy pequeño)
 
 def crear_pistas():
     pistas = [
@@ -249,16 +228,12 @@ def agrupar_pistas_por_lugar(pistas):
     return por_lugar
 
 
-# ============================================================
 # 6. BFS: EXPLORACIÓN EN ANCHURA DEL GRAFO
-# ------------------------------------------------------------
-# bfs_explorar recorre el grafo desde un nodo inicial (C0)
-# usando Búsqueda en Anchura (BFS).
-#
+
+# La función bfs_explorar recorre el grafo desde un nodo inicial (C0) usando Búsqueda en Anchura (BFS).
 # Complejidad temporal teórica:
 #   O(n + m)  -> recorre cada nodo y cada arista como mucho una vez.
-# En un grafo denso se puede acotar como O(n^2).
-# ============================================================
+# En un grafo denso se podría resumir en O(n^2).
 
 def bfs_explorar(grafo, nodo_inicial, pistas_por_lugar):
     visitados = set([nodo_inicial])
@@ -281,17 +256,13 @@ def bfs_explorar(grafo, nodo_inicial, pistas_por_lugar):
     return orden, pistas_encontradas
 
 
-# ============================================================
 # 7. DIJKSTRA: CAMINOS MÍNIMOS DESDE UN ORIGEN
-# ------------------------------------------------------------
-# Esta implementación de Dijkstra busca en cada paso el nodo
-# no visitado con menor distancia recorriendo la lista linealmente.
-#
+
+# Aquí Dijkstra busca en cada paso el nodo no visitado con menor distancia recorriendo la lista linealmente.
 # Complejidad temporal:
 #   - Selección de mínimo en cada iteración: O(n)
 #   - Hay n iteraciones -> O(n^2)
 # Es decir, pertenece a la clase O(n^2).
-# ============================================================
 
 def dijkstra(grafo, origen):
     dist = {n: math.inf for n in grafo}
@@ -328,23 +299,17 @@ def reconstruir_camino(previo, origen, destino):
     return camino[::-1]
 
 
-# ============================================================
 # 8. PRECÁLCULO DE DISTANCIAS Y PLAN ÓPTIMO
-# ------------------------------------------------------------
-# precomputar_distancias_todas:
+
+# La función precomputar_distancias_todas:
 #   - ejecuta Dijkstra una vez por cada nodo
-#   - coste total: n * O(n^2) = O(n^3)
-# En nuestro grafo n=6, así que en la práctica es muy rápido,
-# casi como O(1) para el usuario.
-#
-# mejor_ruta_investigacion:
+#   - tiene um coste total de: n * O(n^2) = O(n^3)
+# En nuestro grafo n=6, así que en la práctica es muy rápido, casi como O(1).
+# La función mejor_ruta_investigacion:
 #   - usa backtracking con poda para explorar rutas posibles.
-#   - en el peor caso la complejidad es exponencial (crece más
-#     rápido que cualquier O(n^k)).
-#   - en la práctica, el tamaño del grafo es tan pequeño y la
-#     restricción de tiempo tan fuerte que el algoritmo es
+#   - en el peor caso la complejidad es exponencial (crece más rápido que cualquier O(n^k)).
+#   - en la práctica, el tamaño del grafo es tan pequeño y la restricción de tiempo tan fuerte que el algoritmo es
 #     totalmente manejable.
-# ============================================================
 
 def precomputar_distancias_todas(grafo):
     """
@@ -402,7 +367,7 @@ def mejor_ruta_investigacion(origen, t_max, pistas_por_lugar, distancias):
                 continue
             coste = distancias[actual][sig]
             if tiempo + coste > t_max:
-                # Poda: si superamos el tiempo máximo, no seguimos
+                # Poda: Si se supera el tiempo máximo, no seguimos
                 continue
 
             ganancia = valor_por_lugar[sig] if sig not in visitados else 0
@@ -420,13 +385,10 @@ def mejor_ruta_investigacion(origen, t_max, pistas_por_lugar, distancias):
     return mejor_val, mejor_cam
 
 
-# ============================================================
 # 9. PUNTUACIÓN GLOBAL DE SOSPECHOSOS
-# ------------------------------------------------------------
-# Aquí simplemente recorro la lista de pistas y sumo puntos por
-# sospechoso. Complejidad O(P), siendo P el número de pistas
-# encontradas. Orden lineal.
-# ============================================================
+
+# Aquí simplemente recorro la lista de pistas y sumo puntos por sospechoso. 
+# Complejidad O(P), siendo P el número de pistas encontradas.
 
 def calcular_puntuaciones_sospechosos(pistas_encontradas):
     punt = defaultdict(int)
@@ -440,22 +402,19 @@ def ranking_sospechosos(puntuaciones):
     """
     Ordena a los sospechosos de mayor a menor puntuación.
     Complejidad: O(S log S), siendo S el número de sospechosos.
-    (ordenación por comparación típica).
     """
     return sorted(puntuaciones.items(), key=lambda x: x[1], reverse=True)
 
 
-# ============================================================
 # 10. PROGRAMA PRINCIPAL (MENÚ)
-# ------------------------------------------------------------
+
 # Resumen de algoritmos por modo:
 #   Modo 1: BFS (O(n + m)) + Dijkstra (O(n^2)) + ranking (O(S log S))
-#   Modo 2: solo dibujo del grafo con pistas (O(n + m + P))
-#   Modo 3: precomputo O(n^3) + backtracking (exponencial en teoría,
+#   Modo 2: Solo dibujo del grafo con pistas (O(n + m + P))
+#   Modo 3: Precomputo O(n^3) + backtracking (exponencial en teoría,
 #           pero rápido en este tamaño de problema)
-#   Modo 4: cálculo local de sospechoso principal por nodo (O(n + P))
-#   Modo 5: lógica narrativa, coste constante O(1).
-# ============================================================
+#   Modo 4: Cálculo de sospechoso principal por nodo (O(n + P))
+#   Modo 5: Lógica narrativa, coste constante O(1).
 
 if __name__ == "__main__":
     grafo = crear_grafo_universidad()
@@ -464,20 +423,18 @@ if __name__ == "__main__":
     origen = "C0"
     distancias_todas = precomputar_distancias_todas(grafo)
 
-    print("=== CLUEDO FINAL ===")  # para comprobar que es este archivo
+    print("=== ASESINATO EN LA UAX ===") 
 
     print("Pistas por lugar:",
           {k: [p['id'] for p in v] for k, v in pistas_por_lugar.items()})
     
     while True:
-        print("\n============================")
         print("¿Qué quieres ver ahora?")
         print("1) Grafo base + BFS + Dijkstra + ranking sospechosos")
         print("2) Grafo con pistas en cada nodo")
         print("3) Plan óptimo de investigación (tiempo limitado)")
         print("4) Grafo con sospechoso principal por nodo")
         print("5) ¿Quieres saber quién fue el asesino?")
-        print("============================")
         modo = input("Elige 1, 2, 3, 4 o 5: ").strip()
 
         if modo == "1":
@@ -514,7 +471,7 @@ if __name__ == "__main__":
             try:
                 t_max = int(input("¿Cuántos minutos tiene el inspector? "))
             except ValueError:
-                print("Tiempo no válido.")
+                print("Tiempo no válido.")     #Te devuelve esto si no se mete un número entero
                 continue
 
             mejor_valor, mejor_camino = mejor_ruta_investigacion(
@@ -541,10 +498,10 @@ if __name__ == "__main__":
                 print("Eva no soportaba más las cuentas atrás de Fausto y")
                 print("Pepelu se compinchó por celos.")
             else:
-                print("\nTú mismo, te quedas sin saberlo.")
+                print("\nVaya... te quedas sin saberlo.")
 
             print("\nFin del programa. ¡Hasta pronto!")
             break
 
         else:
-            print("Opción no válida.")
+            print("Opción no válida.")      #Si no se pone una de las opciones del menú
